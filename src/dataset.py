@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import torch
 import torchvision
@@ -8,12 +9,28 @@ from torch.utils.data.sampler import Sampler
 #    Helpers
 # -------------------------------------------------------------
 
-def load_mnist(batch_size, data_dir, augmentation=False, stddev=0.0, adv_subset=1000, workers=4):
+def load_dataset(dataset, batch_size, data_root, noise=False,
+                 stddev=0.0, adv_subset=1000, workers=4):
+    data_dir = os.path.join(data_root, dataset)
+    if dataset == 'mnist':
+        train_loader, test_loader, adv_test_loader, input_shape, num_classes = \
+                load_mnist(batch_size, data_dir, noise,
+                           stddev, adv_subset, workers)
+    elif dataset == 'cifar10':
+        train_loader, test_loader, adv_test_loader, input_shape, num_classes = \
+                load_cifar10(batch_size, data_dir, noise,
+                             stddev, adv_subset, workers)
+    else:
+        raise NotImplementedError
 
+    return train_loader, test_loader, adv_test_loader, input_shape, num_classes
+        
+
+def load_mnist(batch_size, data_dir, noise=False, stddev=0.0, adv_subset=1000, workers=4):
     trainloader, _, classes = get_mnist(batch_size=batch_size,
                                         train=True,
                                         path=data_dir,
-                                        augmentation=augmentation,
+                                        noise=noise,
                                         std=stddev,
                                         shuffle=True,
                                         workers=workers
@@ -40,12 +57,12 @@ def load_mnist(batch_size, data_dir, augmentation=False, stddev=0.0, adv_subset=
     return trainloader, testloader, adv_testloader, input_shape, len(classes)
 
 
-def load_cifar10(batch_size, data_dir, augmentation=False, stddev=0.0, adv_subset=1000, workers=4):
+def load_cifar10(batch_size, data_dir, noise=False, stddev=0.0, adv_subset=1000, workers=4):
 
     trainloader, _, classes = get_cifar10(batch_size=batch_size,
                                           train=True,
                                           path=data_dir,
-                                          augmentation=augmentation,
+                                          noise=noise,
                                           std=stddev,
                                           shuffle=True,
                                           workers=workers
@@ -72,12 +89,11 @@ def load_cifar10(batch_size, data_dir, augmentation=False, stddev=0.0, adv_subse
     return trainloader, testloader, adv_testloader, input_shape, len(classes)
 
 
-
-def get_mnist(batch_size, train, path, augmentation=False, std=0.0, shuffle=True, adversarial=False, subset=1000,
+def get_mnist(batch_size, train, path, noise=False, std=0.0, shuffle=True, adversarial=False, subset=1000,
               workers=0):
     classes = np.arange(0, 10)
 
-    if augmentation:
+    if noise:
         transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Lambda(lambda x: x + torch.Tensor(x.size()).normal_(mean=0.0, std=std)),  # add gaussian noise
@@ -116,11 +132,11 @@ def get_mnist(batch_size, train, path, augmentation=False, std=0.0, shuffle=True
     return dataloader, dataset, classes
 
 
-def get_cifar10(batch_size, train, path, augmentation=False, std=0.0, shuffle=True, adversarial=False, subset=1000,
+def get_cifar10(batch_size, train, path, noise=False, std=0.0, shuffle=True, adversarial=False, subset=1000,
                 workers=0):
     classes = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
-    if augmentation:
+    if noise:
         transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Lambda(lambda x: x + torch.Tensor(x.size()).normal_(0.0, std)),  # add gaussian noise
