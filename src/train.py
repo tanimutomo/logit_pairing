@@ -81,12 +81,14 @@ def main():
         if opt.adv_val_freq != -1 and epoch % opt.adv_val_freq == 0:
             aval_losses, aval_acc1s, aval_acc5s = \
                 trainer.adv_validate(adv_val_loader)
+        else:
+            aval_losses, aval_acc1s, aval_acc5s = dict(), dict(), dict()
 
         losses = dict(**train_losses, **val_losses, **aval_losses)
         acc1s = dict(**train_acc1s, **val_acc1s, **aval_acc1s)
         acc5s = dict(**train_acc5s, **val_acc5s, **aval_acc5s)
         report_epoch_status(losses, acc1s, acc5s, trainer.num_loss,
-                            epoch, opt.num_epochs, opt, timer)
+                            epoch, opt, timer)
 
     save_path = os.path.join('ckpt', 'models', opt.save_name + 'pth')
     trainer.save_model(save_path)

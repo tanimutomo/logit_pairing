@@ -61,14 +61,15 @@ def init_he(m):
 
 
 def report_epoch_status(losses, acc1s, acc5s, num_loss,
-                        epoch, epochs, opt, timer):
-    log = '\r\033[{}A\033[J'.format(num_loss+1) \
-          + 'epoch [{:d}/{:d}]'.format(epoch, epochs)
+                        epoch, opt, timer):
+    is_adv_val = opt.adv_val_freq != -1 and epoch % opt.adv_val_freq == 0
+    log = '\r\033[{}A\033[J'.format(num_loss+2) \
+          + 'epoch [{:d}/{:d}]'.format(epoch, opt.num_epochs)
 
     # loss
     log += '\n[loss] '
     for flag, name in zip([opt.ct, opt.at, opt.alp, opt.clp, opt.lsq,
-                           True, True, True],
+                           True, True, is_adv_val],
                           ['ct', 'at', 'alp', 'clp', 'lsq',
                            'total', 'val', 'aval']):
         if flag:
@@ -76,14 +77,14 @@ def report_epoch_status(losses, acc1s, acc5s, num_loss,
 
     # acc1 log
     log += '\n[acc1] '
-    for flag, name in zip([opt.ct, opt.at, True, True],
+    for flag, name in zip([opt.ct, opt.at, True, is_adv_val],
                           ['ct', 'at', 'val', 'aval']):
         if flag:
             log += '{} {:.2f}% / '.format(name, acc1s[name].avg)
 
     # acc5 log
     log += '\n[acc5] '
-    for flag, name in zip([opt.ct, opt.at, True, True],
+    for flag, name in zip([opt.ct, opt.at, True, is_adv_val],
                           ['ct', 'at', 'val', 'aval']):
         if flag:
             log += '{} {:.2f}% / '.format(name, acc5s[name].avg)

@@ -42,10 +42,10 @@ class Trainer():
                              self.opt.clp, self.opt.lsq])
 
     def set_val_meters(self, val_type):
-        self.loss_meters = dict(val_type=AverageMeter())
-        self.acc1_meters = dict(val_type=AverageMeter())
-        self.acc5_meters = dict(val_type=AverageMeter())
-        self.num_loss = 2
+        self.loss_meters = {val_type: AverageMeter()}
+        self.acc1_meters = {val_type: AverageMeter()}
+        self.acc5_meters = {val_type: AverageMeter()}
+        self.num_loss = 1 
 
     def update_log_meters(self, name, size, loss, acc1=None, acc5=None):
         self.loss_meters[name].update(loss, size)
@@ -128,43 +128,45 @@ class Trainer():
             if itr % self.opt.print_freq == 0:
                 sys.stdout.write(self.log)
 
+        print('\r\033[{}A\033[J'.format(self.num_loss+2))
         return self.loss_meters, self.acc1_meters, self.acc5_meters
 
     def validate(self, loader):
-        train_num_loss = self.num_loss
         self.set_val_meters('val')
         self.model.eval()
 
-        with torc.no_grad():
-        for itr, (x, t) in enumerate(loader):
-            # log for printing a training status
-            self.log = '\r\033[{}A\033[J'.format(train_num_loss+2) \
-                       + '[val mode] ' \
-                       + 'itr [{:d}/{:d}]\n'.format(itr, len(loader))
+        print("\n" * (self.num_loss + 1))
+        with torch.no_grad():
+            for itr, (x, t) in enumerate(loader):
+                # log for printing a training status
+                self.log = '\r\033[{}A\033[J'.format(self.num_loss+1) \
+                           + '[val mode] ' \
+                           + 'itr [{:d}/{:d}]\n'.format(itr, len(loader))
 
-            x = x.to(self.device, non_blocking=self.opt.cuda)
-            t = t.to(self.device, non_blocking=self.opt.cuda)
+                x = x.to(self.device, non_blocking=self.opt.cuda)
+                t = t.to(self.device, non_blocking=self.opt.cuda)
 
-            # calcurate clean loss and accuracy
-            y = self.model(x)
-            val_loss = self.criterion(y, t)
-            val_acc1, val_acc5 = self.accuracy(y, t, topk=(1,5))
-            self.update_log_meters('val', x.size(0), val_loss.item(),
-                                   val_acc1.item(), val_acc5.item())
+                # calcurate clean loss and accuracy
+                y = self.model(x)
+                val_loss = self.criterion(y, t)
+                val_acc1, val_acc5 = self.accuracy(y, t, topk=(1,5))
+                self.update_log_meters('val', x.size(0), val_loss.item(),
+                                       val_acc1.item(), val_acc5.item())
 
-            if itr % self.opt.print_freq == 0:
-                sys.stdout.write(self.log)
+                if itr % self.opt.print_freq == 0:
+                    sys.stdout.write(self.log)
 
+        print('\r\033[{}A\033[J'.format(self.num_loss+1))
         return self.loss_meters, self.acc1_meters, self.acc5_meters
 
     def adv_validate(self, loader):
-        train_num_loss = self.num_loss
         self.set_val_meters('aval')
         self.model.eval()
 
+        print("\n" * (self.num_loss + 1))
         for itr, (x, t) in enumerate(loader):
             # log for printing a training status
-            self.log = '\r\033[{}A\033[J'.format(train_num_loss+2) \
+            self.log = '\r\033[{}A\033[J'.format(self.num_loss+1) \
                        + '[adv val mode] ' \
                        + 'itr [{:d}/{:d}]\n'.format(itr, len(loader))
 
@@ -184,6 +186,7 @@ class Trainer():
             if itr % self.opt.print_freq == 0:
                 sys.stdout.write(self.log)
 
+        print('\r\033[{}A\033[J'.format(self.num_loss+1))
         return self.loss_meters, self.acc1_meters, self.acc5_meters
 
     def accuracy(self, output, target, topk=(1,)):
