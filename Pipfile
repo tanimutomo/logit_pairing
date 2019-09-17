@@ -9,6 +9,7 @@ verify_ssl = true
 torch = "==1.0.0"
 torchvision = "==0.2.2"
 advertorch = "*"
+comet-ml = "*"
 
 [requires]
 python_version = "3.6"

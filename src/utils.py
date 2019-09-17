@@ -46,6 +46,7 @@ def get_options():
     parser.add_argument('--scheduler_gamma', type=float, default=0.1)
     parser.add_argument('--num_epochs', type=int, default=30)
     # others
+    parser.add_argument('--comet', action='store_true')
     parser.add_argument('--print_freq', type=int, default=10)
     parser.add_argument('--adv_val_freq', type=int, default=5)
     parser.add_argument('--save_name', type=str, required=True)
@@ -61,7 +62,7 @@ def init_he(m):
 
 
 def report_epoch_status(losses, acc1s, acc5s, num_loss,
-                        epoch, opt, timer):
+                        epoch, opt, timer, experiment):
     is_adv_val = opt.adv_val_freq != -1 and epoch % opt.adv_val_freq == 0
     log = '\r\033[{}A\033[J'.format(num_loss+2) \
           + 'epoch [{:d}/{:d}]'.format(epoch, opt.num_epochs)
@@ -74,6 +75,10 @@ def report_epoch_status(losses, acc1s, acc5s, num_loss,
                            'total', 'val', 'aval']):
         if flag:
             log += '{} {:.4f} / '.format(name, losses[name].avg)
+            if experiment:
+                experiment.log_metric(name + '-loss',
+                                      losses[name].avg,
+                                      step=epoch)
 
     # acc1 log
     log += '\n[acc1] '
@@ -81,6 +86,10 @@ def report_epoch_status(losses, acc1s, acc5s, num_loss,
                           ['ct', 'at', 'val', 'aval']):
         if flag:
             log += '{} {:.2f}% / '.format(name, acc1s[name].avg)
+            if experiment:
+                experiment.log_metric(name + '-acc1',
+                                      acc1s[name].avg,
+                                      step=epoch)
 
     # acc5 log
     log += '\n[acc5] '

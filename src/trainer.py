@@ -10,13 +10,15 @@ class Trainer():
     Args:
         
     """
-    def __init__(self, opt, device, model, criterion, attacker, optimizer):
+    def __init__(self, opt, device, model, criterion, attacker, optimizer,
+                 experiment):
         self.opt = opt
         self.device = device
         self.model = model
         self.criterion = criterion
         self.attacker = attacker
         self.optimizer = optimizer
+        self.experiment = experiment
 
     def set_train_meters(self):
         # set loss meters
@@ -47,7 +49,8 @@ class Trainer():
         self.acc5_meters = {val_type: AverageMeter()}
         self.num_loss = 1 
 
-    def update_log_meters(self, name, size, loss, acc1=None, acc5=None):
+    def update_log_meters(self, name, size, loss,
+                          acc1=None, acc5=None):
         self.loss_meters[name].update(loss, size)
         self.log += '[{}] loss {:.4f}, '.format(name, loss)
         if acc1 is not None:

@@ -1,3 +1,5 @@
+from comet_ml import Experiment
+
 import os
 import sys
 import torch
@@ -14,6 +16,12 @@ from model import LeNet
 
 def main():
     opt = get_options()
+    
+    if opt.comet:
+        experiment = Experiment()
+        experiment.log_parameters(opt.__dict__)
+    else:
+        experiment = None
 
     # device
     device = torch.device('cuda:{}'.format(opt.gpu_id)
@@ -69,26 +77,49 @@ def main():
     timer = Timer(opt.num_epochs, 0)
 
     # trainer
-    trainer = Trainer(opt, device, model, criterion, attacker, optimizer)
+    trainer = Trainer(opt, device, model, criterion, attacker, optimizer,
+                      experiment)
     
     # epoch iteration
     for epoch in range(1, opt.num_epochs+1):
         if scheduler:
             scheduler.step(epoch - 1) # scheduler's epoch is 0-indexed.
 
-        train_losses, train_acc1s, train_acc5s = trainer.train(train_loader)
-        val_losses, val_acc1s, val_acc5s = trainer.validate(val_loader)
-        if opt.adv_val_freq != -1 and epoch % opt.adv_val_freq == 0:
-            aval_losses, aval_acc1s, aval_acc5s = \
-                trainer.adv_validate(adv_val_loader)
+        # training
+        if experiment is not None:
+            with experiment.train():
+                train_losses, train_acc1s, train_acc5s = \
+                        trainer.train(train_loader)
         else:
-            aval_losses, aval_acc1s, aval_acc5s = dict(), dict(), dict()
+            train_losses, train_acc1s, train_acc5s = \
+                    trainer.train(train_loader)
+
+        # validation
+        if experiment is not None:
+            with experiment.test():
+                val_losses, val_acc1s, val_acc5s = \
+                        trainer.validate(val_loader)
+                if opt.adv_val_freq != -1 and epoch % opt.adv_val_freq == 0:
+                    aval_losses, aval_acc1s, aval_acc5s = \
+                        trainer.adv_validate(adv_val_loader)
+                else:
+                    aval_losses, aval_acc1s, aval_acc5s = \
+                            dict(), dict(), dict()
+        else:
+            val_losses, val_acc1s, val_acc5s = \
+                    trainer.validate(val_loader)
+            if opt.adv_val_freq != -1 and epoch % opt.adv_val_freq == 0:
+                aval_losses, aval_acc1s, aval_acc5s = \
+                    trainer.adv_validate(adv_val_loader)
+            else:
+                aval_losses, aval_acc1s, aval_acc5s = \
+                        dict(), dict(), dict()
 
         losses = dict(**train_losses, **val_losses, **aval_losses)
         acc1s = dict(**train_acc1s, **val_acc1s, **aval_acc1s)
         acc5s = dict(**train_acc5s, **val_acc5s, **aval_acc5s)
         report_epoch_status(losses, acc1s, acc5s, trainer.num_loss,
-                            epoch, opt, timer)
+                            epoch, opt, timer, experiment)
 
     save_path = os.path.join('ckpt', 'models', opt.save_name + 'pth')
     trainer.save_model(save_path)
