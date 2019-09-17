@@ -1,3 +1,4 @@
+import os
 import sys
 import torch
 import torch.nn as nn
@@ -77,10 +78,13 @@ def main():
 
         train_losses, train_acc1s, train_acc5s = trainer.train(train_loader)
         val_losses, val_acc1s, val_acc5s = trainer.validate(val_loader)
+        if opt.adv_val_freq != -1 and epoch % opt.adv_val_freq == 0:
+            aval_losses, aval_acc1s, aval_acc5s = \
+                trainer.adv_validate(adv_val_loader)
 
-        losses = dict(**train_losses, **val_losses)
-        acc1s = dict(**train_acc1s, **val_acc1s)
-        acc5s = dict(**train_acc5s, **val_acc5s)
+        losses = dict(**train_losses, **val_losses, **aval_losses)
+        acc1s = dict(**train_acc1s, **val_acc1s, **aval_acc1s)
+        acc5s = dict(**train_acc5s, **val_acc5s, **aval_acc5s)
         report_epoch_status(losses, acc1s, acc5s, trainer.num_loss,
                             epoch, opt.num_epochs, opt, timer)
 

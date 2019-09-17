@@ -41,13 +41,10 @@ class Trainer():
         self.num_loss = sum([self.opt.ct, self.opt.at, self.opt.alp,
                              self.opt.clp, self.opt.lsq])
 
-    def set_val_meters(self):
-        self.loss_meters, self.acc1_meters, self.acc5_meters = \
-            dict(), dict(), dict()
-        for name in ['val', 'aval']:
-            self.loss_meters[name] = AverageMeter()
-            self.acc1_meters[name] = AverageMeter()
-            self.acc5_meters[name] = AverageMeter()
+    def set_val_meters(self, val_type):
+        self.loss_meters = dict(val_type=AverageMeter())
+        self.acc1_meters = dict(val_type=AverageMeter())
+        self.acc5_meters = dict(val_type=AverageMeter())
         self.num_loss = 2
 
     def update_log_meters(self, name, size, loss, acc1=None, acc5=None):
@@ -135,13 +132,14 @@ class Trainer():
 
     def validate(self, loader):
         train_num_loss = self.num_loss
-        self.set_val_meters()
+        self.set_val_meters('val')
         self.model.eval()
 
+        with torc.no_grad():
         for itr, (x, t) in enumerate(loader):
             # log for printing a training status
             self.log = '\r\033[{}A\033[J'.format(train_num_loss+2) \
-                       + '[validation mode] ' \
+                       + '[val mode] ' \
                        + 'itr [{:d}/{:d}]\n'.format(itr, len(loader))
 
             x = x.to(self.device, non_blocking=self.opt.cuda)
@@ -149,19 +147,39 @@ class Trainer():
 
             # calcurate clean loss and accuracy
             y = self.model(x)
-            loss = self.criterion(y, t)
-            acc1, acc5 = self.accuracy(y, t, topk=(1,5))
-            self.update_log_meters('val', x.size(0), loss.item(),
-                                   acc1.item(), acc5.item())
+            val_loss = self.criterion(y, t)
+            val_acc1, val_acc5 = self.accuracy(y, t, topk=(1,5))
+            self.update_log_meters('val', x.size(0), val_loss.item(),
+                                   val_acc1.item(), val_acc5.item())
+
+            if itr % self.opt.print_freq == 0:
+                sys.stdout.write(self.log)
+
+        return self.loss_meters, self.acc1_meters, self.acc5_meters
+
+    def adv_validate(self, loader):
+        train_num_loss = self.num_loss
+        self.set_val_meters('aval')
+        self.model.eval()
+
+        for itr, (x, t) in enumerate(loader):
+            # log for printing a training status
+            self.log = '\r\033[{}A\033[J'.format(train_num_loss+2) \
+                       + '[adv val mode] ' \
+                       + 'itr [{:d}/{:d}]\n'.format(itr, len(loader))
+
+            x = x.to(self.device, non_blocking=self.opt.cuda)
+            t = t.to(self.device, non_blocking=self.opt.cuda)
 
             # attack
             perturbed_x = self.attacker.perturb(x, t)
 
             # calcurate adversarial loss and accuracy
             perturbed_y = self.model(perturbed_x)
-            acc1, acc5 = self.accuracy(perturbed_y, t, topk=(1, 5))
-            self.update_log_meters('aval', x.size(0), loss.item(),
-                                   acc1.item(), acc5.item())
+            aval_loss = self.criterion(perturbed_y, t)
+            aval_acc1, aval_acc5 = self.accuracy(perturbed_y, t, topk=(1, 5))
+            self.update_log_meters('aval', x.size(0), aval_loss.item(),
+                                   aval_acc1.item(), aval_acc5.item())
 
             if itr % self.opt.print_freq == 0:
                 sys.stdout.write(self.log)
