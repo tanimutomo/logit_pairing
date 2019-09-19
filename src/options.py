@@ -54,6 +54,11 @@ def get_options():
     parser.add_argument('--print_freq', type=int, default=10, help='frequency of printing logs')
     parser.add_argument('--adv_val_freq', type=int, default=5, help='frequency of adversarial validation')
 
+    # debug
+    parser.add_argument('--report_itr_losses', type=str, nargs='*', 
+                        choices=['ct', 'at', 'alp', 'clp', 'lsq'],
+                        help='report loss each iteration in the training phase')
+
     opt = parser.parse_args()
     return opt
 

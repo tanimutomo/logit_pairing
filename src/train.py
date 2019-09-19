@@ -89,6 +89,7 @@ def main():
     
     # epoch iteration
     for epoch in range(1, opt.num_epochs+1):
+        trainer.epoch = epoch
         if scheduler:
             scheduler.step(epoch - 1) # scheduler's epoch is 0-indexed.
 

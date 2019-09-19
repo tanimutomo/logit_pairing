@@ -19,6 +19,7 @@ class Trainer():
         self.attacker = attacker
         self.optimizer = optimizer
         self.experiment = experiment
+        self.epoch = 0
 
     def set_train_meters(self):
         # set loss meters
@@ -51,14 +52,24 @@ class Trainer():
 
     def update_log_meters(self, name, size, loss,
                           acc1=None, acc5=None):
+        # loss
         self.loss_meters[name].update(loss, size)
         self.log += '[{}] loss {:.4f}, '.format(name, loss)
+        if name in self.opt.report_itr_loss:
+            self.experiment.log_metric(
+                '{}-loss'.format(name), loss,
+                step=self.epoch * self.len_train_loader + self.train_itr)
+
+        # acc1
         if acc1 is not None:
             self.acc1_meters[name].update(acc1, size)
             self.log += 'acc1 {:.2f}%, '.format(acc1)
+
+        # acc5
         if acc5 is not None:
             self.acc5_meters[name].update(acc5, size)
             self.log += 'acc5 {:.2f}%, '.format(acc5)
+
         self.log += '\n'
 
     def train(self, loader):
@@ -68,9 +79,11 @@ class Trainer():
         # initialize log and meters
         self.set_train_meters()
         self.model.train()
+        self.len_train_loader = len(loader)
 
         print("\n" * (self.num_loss + 1))
         for itr, (x, t) in enumerate(loader):
+            self.train_itr = itr
             # log for printing a training status
             self.log = '\r\033[{}A\033[J'.format(self.num_loss+2) \
                        + '[train mode] ' \
@@ -112,14 +125,17 @@ class Trainer():
                 self.update_log_meters('clp', x.size(0), clp_loss.item())
 
             # clean logit squeezing
-            elif self.opt.lsq:
+            if self.opt.lsq:
                 lsq_loss = torch.norm(y, p=2, dim=1).mean()
                 self.update_log_meters('lsq', x.size(0), lsq_loss.item())
 
             # sum all losses
             loss = (self.opt.ct_lambda * ct_loss) + (self.opt.at_lambda * at_loss) \
-                 + (self.opt.alp_lambda * alp_loss) + (self.opt.clp_lambda * clp_loss) \
-                 + (self.opt.lsq_lambda * lsq_loss)
+                 + (self.opt.alp_lambda * alp_loss) + (self.opt.clp_lambda * clp_loss)
+            if self.opt.lsq_lambda_grad:
+                loss += (min(0.1 * self.epoch, self.opt.lsq_lambda) * lsq_loss)
+            else:
+                loss += self.opt.lsq_lambda * lsq_loss
             self.update_log_meters('total', x.size(0), loss.item())
 
             # update model weights
