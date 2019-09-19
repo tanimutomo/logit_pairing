@@ -19,7 +19,14 @@ def main():
     
     if opt.comet:
         experiment = Experiment()
+        experiment.set_name(opt.exp_name)
         experiment.log_parameters(opt.__dict__)
+        experiment.add_tag('{}e'.format(opt.num_epochs))
+        for flag, name in zip(
+                [opt.ct, opt.at, opt.alp, opt.clp, opt.lsq],
+                ['ct', 'at', 'alp', 'clp', 'lsq']):
+            if flag:
+                experiment.add_tag(name)
     else:
         experiment = None
 
@@ -89,14 +96,14 @@ def main():
         if experiment is not None:
             with experiment.train():
                 train_losses, train_acc1s, train_acc5s = \
-                        trainer.train(train_loader)
+                        trainer.train(train_loader, epoch)
         else:
             train_losses, train_acc1s, train_acc5s = \
-                    trainer.train(train_loader)
+                    trainer.train(train_loader, epoch)
 
         # validation
         if experiment is not None:
-            with experiment.test():
+            with experiment.validate():
                 val_losses, val_acc1s, val_acc5s = \
                         trainer.validate(val_loader)
                 if opt.adv_val_freq != -1 and epoch % opt.adv_val_freq == 0:
@@ -121,7 +128,7 @@ def main():
         report_epoch_status(losses, acc1s, acc5s, trainer.num_loss,
                             epoch, opt, timer, experiment)
 
-    save_path = os.path.join('ckpt', 'models', opt.save_name + 'pth')
+    save_path = os.path.join('ckpt', 'models', opt.exp_name + 'pth')
     trainer.save_model(save_path)
 
 if __name__ == '__main__':
