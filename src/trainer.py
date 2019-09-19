@@ -91,26 +91,26 @@ class Trainer():
 
             x = x.to(self.device, non_blocking=self.opt.cuda)
             t = t.to(self.device, non_blocking=self.opt.cuda)
+            y = self.model(x)
+
+            # create adversarial examples
+            if self.opt.at or self.opt.alp:
+                self.model.eval()
+                perturbed_x = self.attacker.perturb(x, t)
+                self.model.train()		
+                perturbed_y = self.model(perturbed_x)
 
             # clean examples training
             if self.opt.ct:
-                y = self.model(x)
                 ct_loss = self.criterion(y, t)
                 ct_acc1, ct_acc5 = self.accuracy(y, t, topk=(1,5))
-
                 self.update_log_meters('ct', x.size(0), ct_loss.item(),
                                        ct_acc1.item(), ct_acc5.item())
 
             # adversarial examples training
-            if self.opt.at:
-                self.model.eval()
-                perturbed_x = self.attacker.perturb(x, t)
-
-                self.model.train()		
-                perturbed_y = self.model(perturbed_x)
+            if self.opt.at
                 at_loss = self.criterion(perturbed_y, t)
                 at_acc1, at_acc5 = self.accuracy(perturbed_y, t, topk=(1,5))
-
                 self.update_log_meters('at', x.size(0), at_loss.item(),
                                        at_acc1.item(), at_acc5.item())
 
