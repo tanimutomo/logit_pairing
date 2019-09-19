@@ -49,7 +49,7 @@ def get_options():
     parser.add_argument('--comet', action='store_true')
     parser.add_argument('--print_freq', type=int, default=10)
     parser.add_argument('--adv_val_freq', type=int, default=5)
-    parser.add_argument('--save_name', type=str, required=True)
+    parser.add_argument('--exp_name', type=str, required=True)
 
     opt = parser.parse_args()
     return opt
