@@ -8,7 +8,8 @@ import torch.optim as optim
 
 from advertorch.attacks import LinfPGDAttack
 
-from utils import get_options, report_epoch_status, Timer, init_he
+from options import get_options
+from utils import report_epoch_status, Timer, init_he
 from dataset import load_dataset
 from trainer import Trainer
 from model import LeNet
@@ -97,10 +98,10 @@ def main():
         if experiment is not None:
             with experiment.train():
                 train_losses, train_acc1s, train_acc5s = \
-                        trainer.train(train_loader, epoch)
+                        trainer.train(train_loader)
         else:
             train_losses, train_acc1s, train_acc5s = \
-                    trainer.train(train_loader, epoch)
+                    trainer.train(train_loader)
 
         # validation
         if experiment is not None:

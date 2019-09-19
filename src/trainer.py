@@ -108,7 +108,7 @@ class Trainer():
                                        ct_acc1.item(), ct_acc5.item())
 
             # adversarial examples training
-            if self.opt.at
+            if self.opt.at:
                 at_loss = self.criterion(perturbed_y, t)
                 at_acc1, at_acc5 = self.accuracy(perturbed_y, t, topk=(1,5))
                 self.update_log_meters('at', x.size(0), at_loss.item(),
