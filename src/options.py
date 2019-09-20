@@ -52,7 +52,7 @@ def get_options():
     parser.add_argument('--exp_name', type=str, required=True, help='experiment name')
     parser.add_argument('--comet', action='store_true', help='use comet for training log')
     parser.add_argument('--print_freq', type=int, default=10, help='frequency of printing logs')
-    parser.add_argument('--adv_val_freq', type=int, default=5, help='frequency of adversarial validation')
+    parser.add_argument('--adv_val_freq', type=int, default=1, help='frequency of adversarial validation')
 
     # debug
     parser.add_argument('--report_itr_loss', type=str, nargs='*', default=[], 
