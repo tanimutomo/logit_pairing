@@ -56,9 +56,8 @@ class Trainer():
         self.loss_meters[name].update(loss, size)
         self.log += '[{}] loss {:.4f}, '.format(name, loss)
         if name in self.opt.report_itr_loss:
-            self.experiment.log_metric(
-                '{}-loss'.format(name), loss,
-                step=self.epoch * self.len_train_loader + self.train_itr)
+            self.experiment.log_metric('{}-loss'.format(name),
+                                       loss)
 
         # acc1
         if acc1 is not None:
@@ -79,11 +78,9 @@ class Trainer():
         # initialize log and meters
         self.set_train_meters()
         self.model.train()
-        self.len_train_loader = len(loader)
 
         print("\n" * (self.num_loss + 1))
         for itr, (x, t) in enumerate(loader):
-            self.train_itr = itr
             # log for printing a training status
             self.log = '\r\033[{}A\033[J'.format(self.num_loss+2) \
                        + '[train mode] ' \

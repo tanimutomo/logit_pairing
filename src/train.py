@@ -90,39 +90,23 @@ def main():
     
     # epoch iteration
     for epoch in range(1, opt.num_epochs+1):
-        trainer.epoch = epoch
+        experiment.set_epoch(epoch)
         if scheduler:
             scheduler.step(epoch - 1) # scheduler's epoch is 0-indexed.
 
         # training
-        if experiment is not None:
-            with experiment.train():
-                train_losses, train_acc1s, train_acc5s = \
-                        trainer.train(train_loader)
-        else:
-            train_losses, train_acc1s, train_acc5s = \
-                    trainer.train(train_loader)
+        train_losses, train_acc1s, train_acc5s = \
+                trainer.train(train_loader)
 
         # validation
-        if experiment is not None:
-            with experiment.validate():
-                val_losses, val_acc1s, val_acc5s = \
-                        trainer.validate(val_loader)
-                if opt.adv_val_freq != -1 and epoch % opt.adv_val_freq == 0:
-                    aval_losses, aval_acc1s, aval_acc5s = \
-                        trainer.adv_validate(adv_val_loader)
-                else:
-                    aval_losses, aval_acc1s, aval_acc5s = \
-                            dict(), dict(), dict()
+        val_losses, val_acc1s, val_acc5s = \
+                trainer.validate(val_loader)
+        if opt.adv_val_freq != -1 and epoch % opt.adv_val_freq == 0:
+            aval_losses, aval_acc1s, aval_acc5s = \
+                trainer.adv_validate(adv_val_loader)
         else:
-            val_losses, val_acc1s, val_acc5s = \
-                    trainer.validate(val_loader)
-            if opt.adv_val_freq != -1 and epoch % opt.adv_val_freq == 0:
-                aval_losses, aval_acc1s, aval_acc5s = \
-                    trainer.adv_validate(adv_val_loader)
-            else:
-                aval_losses, aval_acc1s, aval_acc5s = \
-                        dict(), dict(), dict()
+            aval_losses, aval_acc1s, aval_acc5s = \
+                    dict(), dict(), dict()
 
         losses = dict(**train_losses, **val_losses, **aval_losses)
         acc1s = dict(**train_acc1s, **val_acc1s, **aval_acc1s)

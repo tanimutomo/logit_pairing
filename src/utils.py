@@ -27,8 +27,7 @@ def report_epoch_status(losses, acc1s, acc5s, num_loss,
             log += '{} {:.4f} / '.format(name, losses[name].avg)
             if experiment:
                 experiment.log_metric(name + '-loss',
-                                      losses[name].avg,
-                                      step=epoch)
+                                      losses[name].avg)
 
     # acc1 log
     log += '\n[acc1] '
@@ -38,8 +37,7 @@ def report_epoch_status(losses, acc1s, acc5s, num_loss,
             log += '{} {:.2f}% / '.format(name, acc1s[name].avg)
             if experiment:
                 experiment.log_metric(name + '-acc1',
-                                      acc1s[name].avg,
-                                      step=epoch)
+                                      acc1s[name].avg)
 
     # acc5 log
     log += '\n[acc5] '
