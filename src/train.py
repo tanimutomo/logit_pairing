@@ -23,6 +23,7 @@ def main():
         experiment.set_name(opt.exp_name)
         experiment.log_parameters(opt.__dict__)
         experiment.add_tag('{}e'.format(opt.num_epochs))
+        experiment.add_tags(opt.add_tags)
         for flag, name in zip(
                 [opt.ct, opt.at, opt.alp, opt.clp, opt.lsq],
                 ['ct', 'at', 'alp', 'clp', 'lsq']):
