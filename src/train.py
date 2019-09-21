@@ -24,10 +24,8 @@ def main():
         experiment.log_parameters(opt.__dict__)
         experiment.add_tag('{}e'.format(opt.num_epochs))
         experiment.add_tags(opt.add_tags)
-        for flag, name in zip(
-                [opt.ct, opt.at, opt.alp, opt.clp, opt.lsq],
-                ['ct', 'at', 'alp', 'clp', 'lsq']):
-            if flag:
+        for name in ['ct', 'at', 'alp', 'clp', 'lsq']:
+            if getattr(opt, name):
                 experiment.add_tag(name)
     else:
         experiment = None
@@ -59,8 +57,8 @@ def main():
     # advertorch attacker
     if opt.attacker == 'pgd':
         attacker = LinfPGDAttack(
-            model, loss_fn = criterion, eps=opt.eps,
-            nb_iter=opt.num_steps, eps_iter=opt.eps_iter,
+            model, loss_fn = criterion, eps=opt.eps/255,
+            nb_iter=opt.num_steps, eps_iter=opt.eps_iter/255,
             rand_init=True, clip_min=0.0, clip_max=1.0,
             targeted=False
         )

@@ -24,10 +24,8 @@ class Trainer():
     def set_train_meters(self):
         # set loss meters
         self.loss_meters = dict(total=AverageMeter())
-        for flag, name in zip([self.opt.ct, self.opt.at, self.opt.alp,
-                               self.opt.clp, self.opt.lsq],
-                              ['ct', 'at', 'alp', 'clp', 'lsq']):
-            if flag:
+        for name in ['ct', 'at', 'alp', 'clp', 'lsq']:
+            if getattr(self.opt, name):
                 self.loss_meters[name] = AverageMeter()
 
         # set acc meters
