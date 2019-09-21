@@ -37,8 +37,8 @@ def get_options():
 
     # attack
     parser.add_argument('--attacker', type=str, default='pgd', help='name of adversarial attack method')
-    parser.add_argument('--eps', type=float, default=0.3, help='epsilon for lp-norm attack')
-    parser.add_argument('--eps_iter', type=float, default=0.01, help='epsilon for each attack step')
+    parser.add_argument('--eps', type=float, default=76.5, help='epsilon for lp-norm attack')
+    parser.add_argument('--eps_iter', type=float, default=2.55, help='epsilon for each attack step')
     parser.add_argument('--num_steps', type=int, default=40, help='number of steps for attack')
 
     # optimization
