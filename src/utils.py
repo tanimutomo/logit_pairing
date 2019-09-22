@@ -25,18 +25,16 @@ def report_epoch_status(losses, acc1s, acc5s, num_loss,
                  'total', 'val', 'aval']:
         if getattr(opt, name):
             log += '{} {:.4f} / '.format(name, losses[name].avg)
-            if experiment:
-                experiment.log_metric(name + '-loss',
-                                      losses[name].avg)
+            experiment.log_metric(name + '-loss',
+                                  losses[name].avg)
 
     # acc1 log
     log += '\n[acc1] '
     for name in ['ct', 'at', 'val', 'aval']:
         if getattr(opt, name):
             log += '{} {:.2f}% / '.format(name, acc1s[name].avg)
-            if experiment:
-                experiment.log_metric(name + '-acc1',
-                                      acc1s[name].avg)
+            experiment.log_metric(name + '-acc1',
+                                  acc1s[name].avg)
 
     # acc5 log
     log += '\n[acc5] '

@@ -80,6 +80,7 @@ class Trainer():
 
         print("\n" * (self.num_loss + 1))
         for itr, (x, t) in enumerate(loader):
+            self.experiment.set_step(itr)
             # log for printing a training status
             self.log = '\r\033[{}A\033[J'.format(self.num_loss+2) \
                        + '[train mode] ' \
