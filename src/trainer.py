@@ -1,6 +1,7 @@
 import sys
 import torch
 import torch.nn.functional as F
+from advertorch.context import ctx_noparamgrad_and_eval
 
 from utils import AverageMeter
 
@@ -90,9 +91,8 @@ class Trainer():
 
             # create adversarial examples
             if self.opt.at or self.opt.alp:
-                self.model.eval()
-                perturbed_x = self.attacker.perturb(x, t)
-                self.model.train()		
+                with ctx_noparamgrad_and_eval(self.model):
+                    perturbed_x = self.attacker.perturb(x, t)
                 perturbed_y = self.model(perturbed_x)
 
             # clean examples training
