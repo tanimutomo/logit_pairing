@@ -11,15 +11,13 @@ class Trainer():
     Args:
         
     """
-    def __init__(self, opt, device, model, criterion, attacker, optimizer,
-                 experiment):
+    def __init__(self, opt, device, model, criterion, attacker, optimizer):
         self.opt = opt
         self.device = device
         self.model = model
         self.criterion = criterion
         self.attacker = attacker
         self.optimizer = optimizer
-        self.experiment = experiment
         self.epoch = 0
 
     def set_train_meters(self):
@@ -42,6 +40,8 @@ class Trainer():
         # number of losses
         self.num_loss = sum([self.opt.ct, self.opt.at, self.opt.alp,
                              self.opt.clp, self.opt.lsq])
+        
+        self.opt.report_itr_loss.append('total')
 
     def set_val_meters(self, val_type):
         self.loss_meters = {val_type: AverageMeter()}
@@ -54,9 +54,9 @@ class Trainer():
         # loss
         self.loss_meters[name].update(loss, size)
         self.log += '[{}] loss {:.4f}, '.format(name, loss)
-        if name in self.opt.report_itr_loss:
-            self.experiment.log_metric('{}-loss'.format(name),
-                                       loss)
+        # if name in self.opt.report_itr_loss:
+        #     self.experiment.log_metric('{}-loss'.format(name),
+        #                                loss)
 
         # acc1
         if acc1 is not None:
@@ -80,7 +80,6 @@ class Trainer():
 
         print("\n" * (self.num_loss + 1))
         for itr, (x, t) in enumerate(loader):
-            self.experiment.set_step(itr)
             # log for printing a training status
             self.log = '\r\033[{}A\033[J'.format(self.num_loss+2) \
                        + '[train mode] ' \

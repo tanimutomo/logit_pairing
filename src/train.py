@@ -18,14 +18,16 @@ from model import LeNet
 def main():
     opt = get_options()
     
-    experiment = Experiment()
-    experiment.set_name(opt.exp_name)
-    experiment.log_parameters(opt.__dict__)
-    experiment.add_tag('{}e'.format(opt.num_epochs))
-    experiment.add_tags(opt.add_tags)
-    for name in ['ct', 'at', 'alp', 'clp', 'lsq']:
-        if getattr(opt, name):
-            experiment.add_tag(name)
+    experiment = None
+    if opt.comet:
+        experiment = Experiment()
+        experiment.set_name(opt.exp_name)
+        experiment.log_parameters(opt.__dict__)
+        experiment.add_tag('{}e'.format(opt.num_epochs))
+        experiment.add_tags(opt.add_tags)
+        for name in ['ct', 'at', 'alp', 'clp', 'lsq']:
+            if getattr(opt, name):
+                experiment.add_tag(name)
 
     # device
     device = torch.device('cuda:{}'.format(opt.gpu_id)
@@ -81,30 +83,27 @@ def main():
     timer = Timer(opt.num_epochs, 0)
 
     # trainer
-    trainer = Trainer(opt, device, model, criterion, attacker, optimizer,
-                      experiment)
+    trainer = Trainer(opt, device, model, criterion, attacker, optimizer)
     
     # epoch iteration
     for epoch in range(1, opt.num_epochs+1):
-        experiment.set_epoch(epoch)
+        trainer.epoch = epoch
         if scheduler:
             scheduler.step(epoch - 1) # scheduler's epoch is 0-indexed.
 
         # training
-        with experiment.train():
-            train_losses, train_acc1s, train_acc5s = \
-                    trainer.train(train_loader)
+        train_losses, train_acc1s, train_acc5s = \
+                trainer.train(train_loader)
 
         # validation
-        with experiment.validate():
-            val_losses, val_acc1s, val_acc5s = \
-                    trainer.validate(val_loader)
-            if opt.adv_val_freq != -1 and epoch % opt.adv_val_freq == 0:
-                aval_losses, aval_acc1s, aval_acc5s = \
-                    trainer.adv_validate(adv_val_loader)
-            else:
-                aval_losses, aval_acc1s, aval_acc5s = \
-                        dict(), dict(), dict()
+        val_losses, val_acc1s, val_acc5s = \
+                trainer.validate(val_loader)
+        if opt.adv_val_freq != -1 and epoch % opt.adv_val_freq == 0:
+            aval_losses, aval_acc1s, aval_acc5s = \
+                trainer.adv_validate(adv_val_loader)
+        else:
+            aval_losses, aval_acc1s, aval_acc5s = \
+                    dict(), dict(), dict()
 
         losses = dict(**train_losses, **val_losses, **aval_losses)
         acc1s = dict(**train_acc1s, **val_acc1s, **aval_acc1s)
