@@ -28,7 +28,7 @@ def main():
     # dataset and data loader
     train_loader, val_loader, adv_val_loader, _, num_classes = \
             load_dataset(opt.dataset, opt.batch_size, opt.data_root,
-                         opt.noise, opt.noise_std, opt.val_samples,
+                         opt.noise, opt.noise_std, opt.num_val_samples,
                          workers=4)
 
     # model
@@ -109,7 +109,7 @@ def main():
         report_epoch_status(losses, acc1s, acc5s, trainer.num_loss,
                             epoch, opt, timer, experiment)
 
-    save_path = os.path.join('ckpt', 'models', opt.exp_name + 'pth')
+    save_path = os.path.join('ckpt', 'models', opt.dataset, opt.exp_name + 'pth')
     trainer.save_model(save_path)
 
 if __name__ == '__main__':
