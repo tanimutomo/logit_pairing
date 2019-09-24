@@ -8,26 +8,22 @@ import torch.optim as optim
 
 from advertorch.attacks import LinfPGDAttack
 
-from options import get_options
+from options import Parser
 from utils import report_epoch_status, Timer, init_he
 from dataset import load_dataset
 from trainer import Trainer
-from model import LeNet
+from model import LeNet, ResNetv2_20
 
 
 def main():
-    opt = get_options()
+    opt = Parser().get()
     
     experiment = None
     if opt.comet:
         experiment = Experiment()
         experiment.set_name(opt.exp_name)
         experiment.log_parameters(opt.__dict__)
-        experiment.add_tag('{}e'.format(opt.num_epochs))
         experiment.add_tags(opt.add_tags)
-        for name in ['ct', 'at', 'alp', 'clp', 'lsq']:
-            if getattr(opt, name):
-                experiment.add_tag(name)
 
     # device
     device = torch.device('cuda:{}'.format(opt.gpu_id)
@@ -43,6 +39,8 @@ def main():
     # model
     if opt.model == 'lenet':
         model = LeNet(num_classes).to(device)
+    elif opt.model == 'resnet':
+        model = ResNetv2_20(num_classes).to(device)
     else:
         raise NotImplementedError
 
@@ -58,9 +56,9 @@ def main():
         attacker = LinfPGDAttack(
             model, loss_fn = criterion, eps=opt.eps/255,
             nb_iter=opt.num_steps, eps_iter=opt.eps_iter/255,
-            rand_init=True, clip_min=0.0, clip_max=1.0,
-            targeted=False
-        )
+            rand_init=True, clip_min=opt.clip_min, 
+            clip_max=opt.clip_max, targeted=False
+            )
     else:
         raise NotImplementedError
 
