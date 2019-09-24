@@ -39,7 +39,7 @@ class ResNetv2_20(nn.Module):
         self.filters = 64
 
         self.conv = nn.Conv2d(3, self.filters, 3, padding=1, bias=False)
-        self.resblock1 = ResBlock(self.filters, bi_channel=True)
+        self.resblock1 = ResBlock(self.filters, bi_channel=False)
         self.resblock2 = ResBlock(self.filters*2)
         self.resblock3 = ResBlock(self.filters*4)
         self.classifier = nn.Sequential(
@@ -59,7 +59,7 @@ class ResNetv2_20(nn.Module):
 
 
 class ResBlock(nn.Module):
-    def __init__(self, base_c, bi_channel=False):
+    def __init__(self, base_c, bi_channel=True):
         super(ResBlock, self).__init__()
         if bi_channel:
             in_c = base_c // 2
@@ -68,7 +68,7 @@ class ResBlock(nn.Module):
             in_c = base_c
             stride = 1
 
-        self.conv = nn.Conv2d(in_c, base_c, 1, stride, 1, bias=False)
+        self.conv = nn.Conv2d(in_c, base_c, 1, stride, 0, bias=False)
         self.block1 = nn.Sequential(
             *convblock(in_c=in_c, out_c=base_c, kernel_size=3,
                        stride=stride, padding=1, bias=False),
@@ -90,7 +90,7 @@ class ResBlock(nn.Module):
 
     def forward(self, x):
         fmap_1 = self.block1(x) + self.conv(x)
-        fmap_2 = self.block(fmap_1) + fmap_1
+        fmap_2 = self.block2(fmap_1) + fmap_1
         fmap_3 = self.block3(fmap_2) + fmap_2 
         return fmap_3
 
