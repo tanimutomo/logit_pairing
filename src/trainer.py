@@ -3,7 +3,7 @@ import torch
 import torch.nn.functional as F
 from advertorch.context import ctx_noparamgrad_and_eval
 
-from utils import AverageMeter
+from utils import AverageMeter, accuracy
 
 
 class Trainer():
@@ -11,7 +11,7 @@ class Trainer():
     Args:
         
     """
-    def __init__(self, opt, model, criterion, attacker, optimizer):
+    def __init__(self, opt, model, criterion, attacker, optimizer=None):
         self.model = model
         self.criterion = criterion
         self.attacker = attacker
@@ -99,14 +99,14 @@ class Trainer():
             # clean examples training
             if self.ct:
                 ct_loss = self.criterion(y, t)
-                ct_acc1, ct_acc5 = self.accuracy(y, t, topk=(1,5))
+                ct_acc1, ct_acc5 = accuracy(y, t, topk=(1,5))
                 self.update_log_meters('ct', x.size(0), ct_loss.item(),
                                        ct_acc1.item(), ct_acc5.item())
 
             # adversarial examples training
             if self.at:
                 at_loss = self.criterion(perturbed_y, t)
-                at_acc1, at_acc5 = self.accuracy(perturbed_y, t, topk=(1,5))
+                at_acc1, at_acc5 = accuracy(perturbed_y, t, topk=(1,5))
                 self.update_log_meters('at', x.size(0), at_loss.item(),
                                        at_acc1.item(), at_acc5.item())
 
@@ -164,7 +164,7 @@ class Trainer():
                 # calcurate clean loss and accuracy
                 y = self.model(x)
                 val_loss = self.criterion(y, t)
-                val_acc1, val_acc5 = self.accuracy(y, t, topk=(1,5))
+                val_acc1, val_acc5 = accuracy(y, t, topk=(1,5))
                 self.update_log_meters('val', x.size(0), val_loss.item(),
                                        val_acc1.item(), val_acc5.item())
 
@@ -194,7 +194,7 @@ class Trainer():
             # calcurate adversarial loss and accuracy
             perturbed_y = self.model(perturbed_x)
             aval_loss = self.criterion(perturbed_y, t)
-            aval_acc1, aval_acc5 = self.accuracy(perturbed_y, t, topk=(1, 5))
+            aval_acc1, aval_acc5 = accuracy(perturbed_y, t, topk=(1, 5))
             self.update_log_meters('aval', x.size(0), aval_loss.item(),
                                    aval_acc1.item(), aval_acc5.item())
 
@@ -203,21 +203,6 @@ class Trainer():
 
         print('\r\033[{}A\033[J'.format(self.num_loss+1))
         return self.loss_meters, self.acc1_meters, self.acc5_meters
-
-    def accuracy(self, output, target, topk=(1,)):
-        with torch.no_grad():
-            maxk = max(topk)
-            batch_size = target.size(0)
-
-            _, pred = output.topk(maxk, dim=1) # top-k index: size (B, k)
-            pred = pred.t() # size (k, B)
-            correct = pred.eq(target.view(1, -1).expand_as(pred))
-
-            acc = []
-            for k in topk:
-                correct_k = correct[:k].float().sum()
-                acc.append(correct_k * 100.0 / batch_size)
-            return acc
 
     def save_model(self, path):
         torch.save(self.model.state_dict(), path)
