@@ -18,9 +18,7 @@ class Parser():
                      model='resnet',
                      eps=16.0,
                      eps_iter=2.0,
-                     num_steps=10,
-                     clip_min=0.0,
-                     clip_max=1.0,
+                     num_steps=10, clip_min=0.0, clip_max=1.0,
                      noise_std=0.06)
         )
 
@@ -33,7 +31,7 @@ class Parser():
         parser.add_argument('--cuda', action='store_true', help='use cuda')
 
         # data
-        parser.add_argument('--data_root', type=str, required=True, help='root of dataset')
+        parser.add_argument('--data_root', type=str, default='~/data', help='root of dataset')
         parser.add_argument('--dataset', type=str, required=True, choices=['mnist', 'cifar10'],
                             help='dataset name')
         parser.add_argument('--batch_size', type=int, help='batch size')
@@ -46,17 +44,12 @@ class Parser():
         parser.add_argument('--weight_init', type=str, default='he', help='method of weight initialization')
 
         # loss
-        parser.add_argument('--ct', action='store_true', help='use clean example training')
-        parser.add_argument('--ct_lambda', type=float, default=0.0, help='coef for clean example training')
-        parser.add_argument('--at', action='store_true', help='use adversarial example training')
-        parser.add_argument('--at_lambda', type=float, default=0.0, help='coef of adversarial example training')
-        parser.add_argument('--alp', action='store_true', help='use adversarial logit pairing')
-        parser.add_argument('--alp_lambda', type=float, default=0.0, help='coef of adversarial logit pairing')
-        parser.add_argument('--clp', action='store_true', help='use clean logit pairing')
-        parser.add_argument('--clp_lambda', type=float, default=0.0, help='coef of clean logit pairing')
-        parser.add_argument('--lsq', action='store_true', help='use logit squeezing')
-        parser.add_argument('--lsq_lambda', type=float, default=0.0, help='coef of logit squeezing')
-        parser.add_argument('--lsq_lambda_grad', action='store_true', help='use gradual coef for logit squeezing')
+        parser.add_argument('--ct', type=float, default=0.0, help='coef for clean example training')
+        parser.add_argument('--at', type=float, default=0.0, help='coef of adversarial example training')
+        parser.add_argument('--alp', type=float, default=0.0, help='coef of adversarial logit pairing')
+        parser.add_argument('--clp', type=float, default=0.0, help='coef of clean logit pairing')
+        parser.add_argument('--lsq', type=float, default=0.0, help='coef of logit squeezing')
+        parser.add_argument('--lsq_grad', action='store_true', help='use gradual coef for logit squeezing')
         parser.add_argument('--wd', type=float, default=0.0, help='weight decay')
 
         # attack
@@ -77,7 +70,7 @@ class Parser():
         # others
         parser.add_argument('--comet', action='store_true', help='use comet for training log')
         parser.add_argument('--print_freq', type=int, default=10, help='frequency of printing logs')
-        parser.add_argument('--adv_val_freq', type=int, default=1, help='frequency of adversarial validation')
+        parser.add_argument('--adv_val_freq', type=int, default=10, help='frequency of adversarial validation')
         parser.add_argument('--add_names', type=str, nargs='*', default=[], help='additional experiment name')
         parser.add_argument('--add_tags', type=str, nargs='*', default=[], help='additinal tags for comet')
 

@@ -26,6 +26,8 @@ class Trainer():
         for name in ['ct', 'at', 'alp', 'clp', 'lsq']:
             if getattr(self.opt, name):
                 self.loss_meters[name] = AverageMeter()
+                # count number of losses for stdout
+                self.num_loss += 1
 
         # set acc meters
         self.acc1_meters = dict()
@@ -37,10 +39,6 @@ class Trainer():
             self.acc1_meters['at'] = AverageMeter()
             self.acc5_meters['at'] = AverageMeter()
 
-        # number of losses
-        self.num_loss = sum([self.opt.ct, self.opt.at, self.opt.alp,
-                             self.opt.clp, self.opt.lsq])
-        
         self.opt.report_itr_loss.append('total')
 
     def set_val_meters(self, val_type):
@@ -125,12 +123,12 @@ class Trainer():
                 self.update_log_meters('lsq', x.size(0), lsq_loss.item())
 
             # sum all losses
-            loss = (self.opt.ct_lambda * ct_loss) + (self.opt.at_lambda * at_loss) \
-                 + (self.opt.alp_lambda * alp_loss) + (self.opt.clp_lambda * clp_loss)
-            if self.opt.lsq_lambda_grad:
-                loss += (min(0.1 * self.epoch, self.opt.lsq_lambda) * lsq_loss)
+            loss = (self.opt.ct * ct_loss) + (self.opt.at * at_loss) \
+                 + (self.opt.alp * alp_loss) + (self.opt.clp * clp_loss)
+            if self.opt.lsq_grad:
+                loss += (min(0.1 * self.epoch, self.opt.lsq) * lsq_loss)
             else:
-                loss += self.opt.lsq_lambda * lsq_loss
+                loss += self.opt.lsq * lsq_loss
             self.update_log_meters('total', x.size(0), loss.item())
 
             # update model weights
