@@ -21,6 +21,9 @@ class Trainer():
         self.epoch = 0
 
     def set_train_meters(self):
+        # set number of losses
+        self.num_loss = 0
+
         # set loss meters
         self.loss_meters = dict(total=AverageMeter())
         for name in ['ct', 'at', 'alp', 'clp', 'lsq']:
