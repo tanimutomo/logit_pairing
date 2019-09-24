@@ -60,6 +60,16 @@ def main():
     aval_losses, aval_acc1s, aval_acc5s = \
         trainer.adv_validate(adv_val_loader)
 
+    print('[model] {}'.format(opt.weight_path))
+    print('[standard]\n'
+          'loss: {} | acc1: {} | acc5: {}'.format(val_losses['val'],
+                                                  val_acc1s['val'],
+                                                  val_acc5s['val'])
+          '\n[adversarial]\n'
+          'loss: {} | acc1: {} | acc5: {}'.format(aval_losses['val'],
+                                                  aval_acc1s['val'],
+                                                  aval_acc5s['val']))
+
 
 if __name__ == '__main__':
     main()
