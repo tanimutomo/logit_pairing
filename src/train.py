@@ -12,7 +12,7 @@ from options import Parser
 from utils import report_epoch_status, Timer, init_he
 from dataset import load_dataset
 from trainer import Trainer
-from model import LeNet, ResNetv2_20
+from models import LeNet, ResNetv2_20
 
 
 def main():
