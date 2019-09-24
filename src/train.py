@@ -109,7 +109,7 @@ def main():
         report_epoch_status(losses, acc1s, acc5s, trainer.num_loss,
                             epoch, opt, timer, experiment)
 
-    save_path = os.path.join('ckpt', 'models', opt.dataset, opt.exp_name + 'pth')
+    save_path = os.path.join('ckpt', opt.dataset, 'models', opt.exp_name + 'pth')
     trainer.save_model(save_path)
 
 if __name__ == '__main__':
