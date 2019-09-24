@@ -133,3 +133,9 @@ class View(nn.Module):
         """
         return x.view(*self.shape)
 
+
+def init_he(m):
+    if type(m) in [nn.Linear or nn.Conv2d]:
+        nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
+        nn.init.zeros_(m.bias)
+

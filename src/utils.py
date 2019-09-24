@@ -2,13 +2,6 @@ import argparse
 import sys
 import time
 import datetime
-import torch.nn as nn
-
-
-def init_he(m):
-    if type(m) in [nn.Linear or nn.Conv2d]:
-        nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
-        nn.init.zeros_(m.bias)
 
 
 def report_epoch_status(losses, acc1s, acc5s, num_loss,
