@@ -25,11 +25,6 @@ def main():
         experiment.log_parameters(opt.__dict__)
         experiment.add_tags(opt.add_tags)
 
-    # device
-    device = torch.device('cuda:{}'.format(opt.gpu_id)
-                          if torch.cuda.is_available() and opt.cuda
-                          else 'cpu')
-
     # dataset and data loader
     train_loader, val_loader, adv_val_loader, _, num_classes = \
             load_dataset(opt.dataset, opt.batch_size, opt.data_root,
@@ -37,10 +32,10 @@ def main():
                          workers=4)
 
     # model
-    if opt.model == 'lenet':
-        model = LeNet(num_classes).to(device)
-    elif opt.model == 'resnet':
-        model = ResNetv2_20(num_classes).to(device)
+    if opt.arch == 'lenet':
+        model = LeNet(num_classes)
+    elif opt.arch == 'resnet':
+        model = ResNetv2_20(num_classes)
     else:
         raise NotImplementedError
 
@@ -48,11 +43,16 @@ def main():
     if opt.weight_init == 'he':
         model.apply(init_he)
 
+    # move model to device
+    model.to(opt.device)
+    if opt.gpu_ids:
+        model = nn.DataParallel(model, device_ids=opt.gpu_ids)
+
     # criterion
     criterion = nn.CrossEntropyLoss()
 
     # advertorch attacker
-    if opt.attacker == 'pgd':
+    if opt.attack == 'pgd':
         attacker = LinfPGDAttack(
             model, loss_fn = criterion, eps=opt.eps/255,
             nb_iter=opt.num_steps, eps_iter=opt.eps_iter/255,
@@ -63,7 +63,7 @@ def main():
         raise NotImplementedError
 
     # optimizer
-    if opt.optimizer == 'Adam':
+    if opt.optim == 'Adam':
         optimizer = optim.Adam(model.parameters(), opt.lr,
                                eps=1e-6, weight_decay=opt.wd)
     else:
@@ -81,7 +81,7 @@ def main():
     timer = Timer(opt.num_epochs, 0)
 
     # trainer
-    trainer = Trainer(opt, device, model, criterion, attacker, optimizer)
+    trainer = Trainer(opt, model, criterion, attacker, optimizer)
     
     # epoch iteration
     for epoch in range(1, opt.num_epochs+1):
