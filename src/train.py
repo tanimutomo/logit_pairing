@@ -9,10 +9,10 @@ import torch.optim as optim
 from advertorch.attacks import LinfPGDAttack
 
 from options import Parser
-from utils import report_epoch_status, Timer, init_he
+from utils import report_epoch_status, Timer
 from dataset import load_dataset
 from trainer import Trainer
-from models import LeNet, ResNetv2_20
+from models import LeNet, ResNetv2_20, init_he
 
 
 def main():
