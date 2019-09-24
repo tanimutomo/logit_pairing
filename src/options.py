@@ -11,14 +11,16 @@ def get_options():
 
     # data
     parser.add_argument('--data_root', type=str, required=True, help='root of dataset')
-    parser.add_argument('--dataset', type=str, required=True, help='dataset name')
+    parser.add_argument('--dataset', type=str, required=True, choices=['mnist', 'cifar10'],
+                        help='dataset name')
     parser.add_argument('--batch_size', type=int, default=256, help='batch size')
     parser.add_argument('--noise', action='store_true', help='gaussian noise')
     parser.add_argument('--noise_std', type=float, default=0.5, help='std of gaussian')
     parser.add_argument('--val_samples', type=int, default=1000, help='number of samples for validation')
 
     # model
-    parser.add_argument('--model', type=str, default='lenet', help='model name')
+    parser.add_argument('--model', type=str, default='lenet', choices=['lenet', 'resnet'],
+                        help='model name')
     parser.add_argument('--weight_init', type=str, default='he', help='method of weight initialization')
 
     # loss
