@@ -1,9 +1,10 @@
 import os
 import sys
+import numpy as np
 import torch
 import torch.nn as nn
 
-from advertorch.attacks import LinfPGDAttack 
+from advertorch.attacks import PGDAttack
 from options import Parser
 from utils import convert_model_from_parallel
 from dataset import load_dataset
@@ -43,11 +44,11 @@ def main():
 
     # advertorch attacker
     if opt.attack == 'pgd':
-        attacker = LinfPGDAttack(
+        attacker = PGDAttack(
             model, loss_fn = criterion, eps=opt.eps/255,
             nb_iter=opt.num_steps, eps_iter=opt.eps_iter/255,
             rand_init=True, clip_min=opt.clip_min, 
-            clip_max=opt.clip_max, targeted=False
+            clip_max=opt.clip_max, ord=np.inf, targeted=False
             )
     else:
         raise NotImplementedError
