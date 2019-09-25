@@ -10,6 +10,7 @@ class Parser():
                    eps=76.5,
                    eps_iter=2.55,
                    num_steps=40,
+                   num_restarts=1,
                    clip_min=0.0,
                    clip_max=1.0,
                    noise_std=0.5),
@@ -20,6 +21,7 @@ class Parser():
                      eps=16.0,
                      eps_iter=2.0,
                      num_steps=10,
+                     num_restarts=1,
                      clip_min=0.0,
                      clip_max=1.0,
                      noise_std=0.06)
@@ -49,6 +51,7 @@ class Parser():
         parser.add_argument('--eps', type=float, help='epsilon for lp-norm attack')
         parser.add_argument('--eps_iter', type=float, help='epsilon for each attack step')
         parser.add_argument('--num_steps', type=int, help='number of steps for attack')
+        parser.add_argument('--num_restarts', type=int, help='number of restats for attack')
         parser.add_argument('--clip_min', type=float, help='minimum value for cliping AEs')
         parser.add_argument('--clip_max', type=float, help='miximum value for cliping AEs')
 
