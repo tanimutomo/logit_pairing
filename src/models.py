@@ -102,7 +102,7 @@ def convblock(in_c, out_c, kernel_size, stride=1, padding=0, use_bn=True, bias=T
     """
     if use_bn:
         return [
-            nn.BatchNorm2d(in_c),
+            nn.BatchNorm2d(in_c, momentum=0.05),
             nn.Conv2d(in_c, out_c, kernel_size, stride, padding, bias=bias),
             nn.ReLU(True)
         ]
