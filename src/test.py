@@ -5,7 +5,7 @@ import torch.nn as nn
 
 from advertorch.attacks import LinfPGDAttack 
 from options import Parser
-from utils import Timer
+from utils import convert_model_from_parallel
 from dataset import load_dataset
 from trainer import Trainer
 from models import LeNet, ResNetv2_20
@@ -32,8 +32,12 @@ def main():
     model.to(opt.device)
 
     # load trained weight
-    model.load_state_dict(torch.load(opt.weight_path))
-
+    try:
+        model.load_state_dict(torch.load(opt.weight_path))
+    except:
+        model_weight = convert_model_from_parallel(opt.weight_path)
+        model.load_state_dict(model_weight)
+    
     # criterion
     criterion = nn.CrossEntropyLoss()
 
@@ -48,12 +52,10 @@ def main():
     else:
         raise NotImplementedError
 
-    # timer
-    timer = Timer(opt.num_epochs, 0)
-
     # trainer
     trainer = Trainer(opt, model, criterion, attacker)
-    
+    trainer.print_freq = -1
+
     # validation
     val_losses, val_acc1s, val_acc5s = \
         trainer.validate(val_loader)
@@ -62,13 +64,13 @@ def main():
 
     print('[model] {}'.format(opt.weight_path))
     print('[standard]\n'
-          'loss: {} | acc1: {} | acc5: {}'.format(val_losses['val'],
-                                                  val_acc1s['val'],
-                                                  val_acc5s['val'])
+          'loss: {:.4f} | acc1: {:.2f}% | acc5: {:.2f}%'
           '\n[adversarial]\n'
-          'loss: {} | acc1: {} | acc5: {}'.format(aval_losses['val'],
-                                                  aval_acc1s['val'],
-                                                  aval_acc5s['val']))
+          'loss: {:.4f} | acc1: {:.2f}% | acc5: {:.2f}%'.format(
+              val_losses['val'].avg, val_acc1s['val'].avg,
+              val_acc5s['val'].avg, aval_losses['aval'].avg,
+              aval_acc1s['aval'].avg, aval_acc5s['aval'].avg
+              ))
 
 
 if __name__ == '__main__':
