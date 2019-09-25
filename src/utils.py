@@ -2,6 +2,8 @@ import argparse
 import sys
 import time
 import datetime
+import torch
+from collections import OrderedDict
 
 
 def accuracy(output, target, topk=(1,)):
@@ -18,6 +20,14 @@ def accuracy(output, target, topk=(1,)):
             correct_k = correct[:k].float().sum()
             acc.append(correct_k * 100.0 / batch_size)
         return acc
+
+
+def convert_model_from_parallel(weight_path):
+    weight = torch.load(weight_path)
+    new_weight = OrderedDict()
+    for name, w in weight.items():
+        new_weight[name[7:]] = w
+    return new_weight
 
 
 def report_epoch_status(losses, acc1s, acc5s, num_loss,
