@@ -19,7 +19,9 @@ class Parser():
                      arch='resnet',
                      eps=16.0,
                      eps_iter=2.0,
-                     num_steps=10, clip_min=0.0, clip_max=1.0,
+                     num_steps=10,
+                     clip_min=0.0,
+                     clip_max=1.0,
                      noise_std=0.06)
         )
 
