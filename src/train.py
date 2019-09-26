@@ -66,6 +66,9 @@ def main():
     if opt.optim == 'Adam':
         optimizer = optim.Adam(model.parameters(), opt.lr,
                                eps=1e-6, weight_decay=opt.wd)
+    elif opt.optim == 'SGD':
+        optimizer = optim.SGD(model.parameters(), opt.lr,
+                              weight_decay=opt.wd)
     else:
         raise NotImplementedError
 

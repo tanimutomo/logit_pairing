@@ -70,7 +70,7 @@ class Parser():
             parser.add_argument('--noise_std', type=float, help='std of gaussian')
 
             # optimization
-            parser.add_argument('--optim', type=str, default='Adam', help='name of optimization method')
+            parser.add_argument('--optim', type=str, default='Adam', choices=['Adam', 'SGD'], help='name of optimization method')
             parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
             parser.add_argument('--scheduler_step', type=int, default=0, help='step for lr-scheduler')
             parser.add_argument('--scheduler_gamma', type=float, default=0.1, help='gamma for lr-scheduler')
@@ -82,7 +82,7 @@ class Parser():
             # others
             parser.add_argument('--comet', action='store_true', help='use comet for training log')
             parser.add_argument('--print_freq', type=int, default=10, help='frequency of printing logs')
-            parser.add_argument('--adv_val_freq', type=int, default=10, help='frequency of adversarial validation')
+            parser.add_argument('--adv_val_freq', type=int, default=1, help='frequency of adversarial validation')
             parser.add_argument('--add_names', type=str, nargs='*', default=[], help='additional experiment name')
             parser.add_argument('--add_tags', type=str, nargs='*', default=[], help='additinal tags for comet')
 
