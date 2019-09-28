@@ -2,12 +2,12 @@ import os
 import numpy as np
 import torch
 import torchvision
-import torchvision.transforms as transforms
-from torch.utils.data.sampler import Sampler
 
-# -------------------------------------------------------------
-#    Helpers
-# -------------------------------------------------------------
+from  torchvision import transforms
+from torch.utils.data.sampler import Sampler 
+
+from src.dataset.util import SubsetSampler
+
 
 def load_dataset(dataset, batch_size, data_root, noise=False,
                  stddev=0.0, adv_subset=1000, workers=4):
@@ -172,19 +172,3 @@ def get_cifar10(batch_size, train, path, noise=False, std=0.0, shuffle=True, adv
                                                  )
     return dataloader, dataset, classes
 
-
-class SubsetSampler(Sampler):
-    def __init__(self, indices):
-        self.indices = indices
-        self.shuffle = False
-
-    def __iter__(self):
-        if self.shuffle:
-            np.random.shuffle(self.indices)
-        return (self.indices[i] for i in range(len(self.indices)))
-
-    def __len__(self):
-        return len(self.indices)
-
-    def set_shuffle(self, shuffle):
-        self.shuffle = shuffle
