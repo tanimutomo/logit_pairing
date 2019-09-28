@@ -10,6 +10,8 @@ torch = "==1.0.0"
 torchvision = "==0.2.2"
 advertorch = "*"
 comet-ml = "*"
+advex-uar = "*"
+ipython = "*"
 
 [requires]
 python_version = "3.6"
