@@ -2,13 +2,32 @@ import argparse
 import sys
 import time
 import datetime
-import torch.nn as nn
+import torch
+from collections import OrderedDict
 
 
-def init_he(m):
-    if type(m) in [nn.Linear or nn.Conv2d]:
-        nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
-        nn.init.zeros_(m.bias)
+def accuracy(output, target, topk=(1,)):
+    with torch.no_grad():
+        maxk = max(topk)
+        batch_size = target.size(0)
+
+        _, pred = output.topk(maxk, dim=1) # top-k index: size (B, k)
+        pred = pred.t() # size (k, B)
+        correct = pred.eq(target.view(1, -1).expand_as(pred))
+
+        acc = []
+        for k in topk:
+            correct_k = correct[:k].float().sum()
+            acc.append(correct_k * 100.0 / batch_size)
+        return acc
+
+
+def convert_model_from_parallel(weight_path):
+    weight = torch.load(weight_path)
+    new_weight = OrderedDict()
+    for name, w in weight.items():
+        new_weight[name[7:]] = w
+    return new_weight
 
 
 def report_epoch_status(losses, acc1s, acc5s, num_loss,

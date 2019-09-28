@@ -8,41 +8,34 @@ import torch.optim as optim
 
 from advertorch.attacks import LinfPGDAttack
 
-from options import get_options
-from utils import report_epoch_status, Timer, init_he
+from options import Parser
+from utils import report_epoch_status, Timer
 from dataset import load_dataset
 from trainer import Trainer
-from model import LeNet
+from models import LeNet, ResNetv2_20, init_he
 
 
 def main():
-    opt = get_options()
+    opt = Parser().get()
     
     experiment = None
     if opt.comet:
         experiment = Experiment()
         experiment.set_name(opt.exp_name)
         experiment.log_parameters(opt.__dict__)
-        experiment.add_tag('{}e'.format(opt.num_epochs))
         experiment.add_tags(opt.add_tags)
-        for name in ['ct', 'at', 'alp', 'clp', 'lsq']:
-            if getattr(opt, name):
-                experiment.add_tag(name)
-
-    # device
-    device = torch.device('cuda:{}'.format(opt.gpu_id)
-                          if torch.cuda.is_available() and opt.cuda
-                          else 'cpu')
 
     # dataset and data loader
     train_loader, val_loader, adv_val_loader, _, num_classes = \
             load_dataset(opt.dataset, opt.batch_size, opt.data_root,
-                         opt.noise, opt.noise_std, opt.val_samples,
+                         opt.noise, opt.noise_std, opt.num_val_samples,
                          workers=4)
 
     # model
-    if opt.model == 'lenet':
-        model = LeNet(num_classes).to(device)
+    if opt.arch == 'lenet':
+        model = LeNet(num_classes)
+    elif opt.arch == 'resnet':
+        model = ResNetv2_20(num_classes)
     else:
         raise NotImplementedError
 
@@ -50,24 +43,32 @@ def main():
     if opt.weight_init == 'he':
         model.apply(init_he)
 
+    # move model to device
+    model.to(opt.device)
+    if opt.gpu_ids:
+        model = nn.DataParallel(model, device_ids=opt.gpu_ids)
+
     # criterion
     criterion = nn.CrossEntropyLoss()
 
     # advertorch attacker
-    if opt.attacker == 'pgd':
+    if opt.attack == 'pgd':
         attacker = LinfPGDAttack(
             model, loss_fn = criterion, eps=opt.eps/255,
             nb_iter=opt.num_steps, eps_iter=opt.eps_iter/255,
-            rand_init=True, clip_min=0.0, clip_max=1.0,
-            targeted=False
-        )
+            rand_init=True, clip_min=opt.clip_min, 
+            clip_max=opt.clip_max, targeted=False
+            )
     else:
         raise NotImplementedError
 
     # optimizer
-    if opt.optimizer == 'Adam':
+    if opt.optim == 'Adam':
         optimizer = optim.Adam(model.parameters(), opt.lr,
                                eps=1e-6, weight_decay=opt.wd)
+    elif opt.optim == 'SGD':
+        optimizer = optim.SGD(model.parameters(), opt.lr,
+                              weight_decay=opt.wd)
     else:
         raise NotImplementedError
 
@@ -83,7 +84,7 @@ def main():
     timer = Timer(opt.num_epochs, 0)
 
     # trainer
-    trainer = Trainer(opt, device, model, criterion, attacker, optimizer)
+    trainer = Trainer(opt, model, criterion, attacker, optimizer)
     
     # epoch iteration
     for epoch in range(1, opt.num_epochs+1):
@@ -111,7 +112,7 @@ def main():
         report_epoch_status(losses, acc1s, acc5s, trainer.num_loss,
                             epoch, opt, timer, experiment)
 
-    save_path = os.path.join('ckpt', 'models', opt.exp_name + 'pth')
+    save_path = os.path.join('ckpt', opt.dataset, 'models', opt.exp_name + '.pth')
     trainer.save_model(save_path)
 
 if __name__ == '__main__':
