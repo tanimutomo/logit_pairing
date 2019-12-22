@@ -19,7 +19,7 @@ Report the only Accuracy for each test set
 
 ### Original Paper
 
-|methods|val|aval - p1|aval - p2|aval-p3|
+|method|val|aval - p1|aval - p2|aval-p3|
 |:--|--:|--:|--:|--:|
 |Plain|83.0%|0.0%|0.0%|0.0%|
 |CLP|73.9%|2.8%|0.4%|0.0%|
@@ -31,8 +31,8 @@ Report the only Accuracy for each test set
 
 ### Our Implementation
 
-|methods|val|aval - p1|aval - p2|aval-p3|
-|:--|:--|--:|--:|--:|--:|
+|method|val|aval - p1|aval - p2|aval-p3|
+|:--|--:|--:|--:|--:|
 |Plain|87.0%|0.0%|0.0%|%|
 |CLP|84.9%|35.2%|7.0%|%|
 |LSQ|84.8%|36.3%|5.9%|%|
@@ -57,7 +57,7 @@ Report the only Accuracy for each test set
 
 ### Original Paper
 
-|methods|val|aval - p1|aval - p2|
+|method|val|aval - p1|aval - p2|
 |:--|--:|--:|--:|
 |Plain|99.2%|0.0%|0.0%|
 |CLP|98.8%|62.4%|29.1%|
@@ -69,19 +69,17 @@ Report the only Accuracy for each test set
 
 ### Original Implementation
 
-|methods|val|aval - p1|aval - p2|
+|method|val|aval - p1|aval - p2|
 |:--|--:|--:|--:|
 |Plain|99.3%|0.00%|%|
 |CLP|99.0%|69.8%|%|
-|LSQ|99.0%|67.9%|%|
-|Plain + ALP|98.7%|95.7%|%|
-|50% AT + ALP|98.6%|95.8%|%|
+|LSQ|99.0%|67.9%|%| |Plain + ALP|98.7%|95.7%|%| |50% AT + ALP|98.6%|95.8%|%|
 |50% AT|99.1%|94.7%|%|
 
 
 ### My Implementation
 
-|methods|val|aval - p1|aval - p2|
+|method|val|aval - p1|aval - p2|
 |:--|--:|--:|--:|
 |Plain|99.3%|0.00%|%|
 |CLP|99.1%|72.8%|%|

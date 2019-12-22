@@ -68,7 +68,7 @@ Report the only Accuracy for each test set
 
 ### Original Paper
 
-|methods|val|aval - p1|aval - p2|aval-p3|
+|method|val|aval - p1|aval - p2|aval-p3|
 |:--|--:|--:|--:|--:|
 |Plain|83.0%|0.0%|0.0%|0.0%|
 |CLP|73.9%|2.8%|0.4%|0.0%|
@@ -79,8 +79,8 @@ Report the only Accuracy for each test set
 
 ### Our Implementation
 
-|methods|val|aval - p1|aval - p2|aval-p3|
-|:--|:--|--:|--:|--:|--:|
+|method|val|aval - p1|aval - p2|aval-p3|
+|:--|--:|--:|--:|--:|
 |Plain|87.0%|0.0%|0.0%|%|
 |CLP|84.9%|35.2%|7.0%|%|
 |LSQ|84.8%|36.3%|5.9%|%|
