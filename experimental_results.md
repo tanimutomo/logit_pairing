@@ -10,6 +10,7 @@ Report the only Accuracy for each test set
 - Attack : PGD-Linf
 - Epsilon : 16.0 / 255.0
 - Others :
+
     |index|eps_iter|num_steps|restarts|
     |:--|--:|--:|--:|
     |p1|2.0|10|1|
@@ -17,6 +18,7 @@ Report the only Accuracy for each test set
     |p3|4.0|400|100|
 
 ### Original Paper
+
 |methods|val|aval - p1|aval - p2|aval-p3|
 |:--|--:|--:|--:|--:|
 |Plain|83.0%|0.0%|0.0%|0.0%|
@@ -28,6 +30,7 @@ Report the only Accuracy for each test set
 
 
 ### Our Implementation
+
 |methods|val|aval - p1|aval - p2|aval-p3|
 |:--|:--|--:|--:|--:|--:|
 |Plain|87.0%|0.0%|0.0%|%|
@@ -44,6 +47,7 @@ Report the only Accuracy for each test set
 - Attack : PGD-Linf
 - Epsilon : 76.5 / 255.0
 - Others :
+
     |set_name|eps|eps_iter|num_steps|restarts|
     |:--|--:|--:|--:|--:|
     |p1|0.3|2.55/255|200|1|
@@ -52,6 +56,7 @@ Report the only Accuracy for each test set
 
 
 ### Original Paper
+
 |methods|val|aval - p1|aval - p2|
 |:--|--:|--:|--:|
 |Plain|99.2%|0.0%|0.0%|
@@ -63,6 +68,7 @@ Report the only Accuracy for each test set
 
 
 ### Original Implementation
+
 |methods|val|aval - p1|aval - p2|
 |:--|--:|--:|--:|
 |Plain|99.3%|0.00%|%|
@@ -74,6 +80,7 @@ Report the only Accuracy for each test set
 
 
 ### My Implementation
+
 |methods|val|aval - p1|aval - p2|
 |:--|--:|--:|--:|
 |Plain|99.3%|0.00%|%|
