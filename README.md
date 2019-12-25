@@ -14,23 +14,24 @@ We can't reproduce the original paper's experiment completely.
 
 ## Starting an Experiment
 ```
-python src/train.py --data_root <path/to/dataset/root> --dataset <dataset_name> <training settings> <override-args>
+python src/train.py --data_root <path/to/dataset/root> --dataset <dataset_name> <train_settings> <override_args>
 ```
-- path/to/dataset/root  
-Set the root directory which contains datasets. (default : `~/data`)
-- dataset_name  
-You can choose datasets from `{mnist, cifar10}`
-- training_settings
+- `<path/to/dataset/root>`  
+Set the root directory path which contains datasets. (default : `~/data`)
+- `<dataset_name>`  
+Choose datasets from `{mnist, cifar10}`
+- `<train_settings>`
     - Plain : `python src/train.py ... --ct 1.0`
     - 50% AT : `python src/train.py ... --ct 0.5 --at 0.5`
     - Plain + ALP : `python src/train.py ... --ct 1.0 --alp 1.0`
     - 50% AT + ALP : `python src/train.py ... --ct 0.5 --at 0.5 --alp 1.0`
     - CLP : `python src/train.py ... --ct 1.0 --clp 0.5`
     - LSQ : `python src/train.py ... --ct 1.0 --lsq 0.5`
-- override_args  
+- `<override_args>`  
 See `src/options.py` for other settings
 
 ### Example Run
+Train the model based on ALP based loss on CIFAR10
 ```
 python src/train.py --data_root <path/to/dataset/root> 
                     --dataset cifar10
